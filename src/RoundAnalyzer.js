@@ -5,35 +5,41 @@
  */
 
 const LOSS_BONUS_PROGRESSION = [1400, 1900, 2400, 2900, 3400];
-const ROUND_WIN_REWARD = 3250;
-const BOMB_PLANT_REWARD = 800; // For T-side
-const BOMB_DEFUSE_REWARD = 300; // For defusing CT
+const ROUND_WIN_BASE_REWARD = 3250;
+const ROUND_WIN_OBJECTIVE_REWARD = 250;
+const BOMB_PLANT_REWARD = 800; // For T-side players, awarded at end of round
 
 export class RoundAnalyzer {
     constructor() {
-        // State can be managed here if needed, or by EconomyTracker
+        // This class is stateless and contains pure functions.
     }
 
     /**
      * Calculates the money each team should receive based on the round's outcome.
      * @param {string} winningTeam - The team that won ('CT' or 'T').
-     * @param {number} tLossBonus - Current loss bonus level for T side.
-     * @param {number} ctLossBonus - Current loss bonus level for CT side.
-     * @param {boolean} bombPlanted - Whether the bomb was planted.
-     * @returns {Object} An object containing rewards for each team.
+     * @param {string} roundEndReason - e.g., 'elimination', 'bomb_defused', 'bomb_exploded', 'time_out'.
+     * @param {number} tLossBonus - Current loss bonus level for T side (0-4).
+     * @param {number} ctLossBonus - Current loss bonus level for CT side (0-4).
+     * @returns {Object} An object containing total rewards for each team.
      */
-    calculateRoundRewards(winningTeam, tLossBonus, ctLossBonus, bombPlanted) {
+    calculateRoundRewards(winningTeam, roundEndReason, tLossBonus, ctLossBonus) {
         const rewards = { T: 0, CT: 0 };
         const losingTeam = winningTeam === 'T' ? 'CT' : 'T';
 
-        // Assign win/loss rewards
-        rewards[winningTeam] = ROUND_WIN_REWARD;
         const losingTeamLossBonus = losingTeam === 'T' ? tLossBonus : ctLossBonus;
         rewards[losingTeam] = LOSS_BONUS_PROGRESSION[losingTeamLossBonus];
 
-        // Handle bomb plant bonus
-        if (bombPlanted && winningTeam === 'CT') {
-            // T-side still gets bonus even if they lose the round after planting
+        // Determine winner's reward
+        let winnerReward = ROUND_WIN_BASE_REWARD;
+        if (['bomb_defused', 'bomb_exploded'].includes(roundEndReason)) {
+            winnerReward += ROUND_WIN_OBJECTIVE_REWARD;
+        }
+        rewards[winningTeam] = winnerReward;
+
+        // Handle bomb plant bonus for Terrorists
+        // This is awarded to the team if the bomb was planted, regardless of round outcome.
+        const bombWasPlanted = roundEndReason === 'bomb_exploded' || roundEndReason === 'bomb_defused';
+        if (bombWasPlanted) {
             rewards.T += BOMB_PLANT_REWARD;
         }
 
