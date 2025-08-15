@@ -1,398 +1,293 @@
-# Agent.md - CS2 Economy Helper Development Instructions
+# Agent Instructions: CS2 Helper Overlay Development
 
-## Project Context & Objectives
+## Overview
+You are tasked with developing a production-ready Overwolf Counter-Strike 2 companion app that captures live game events and renders an interactive in-game overlay. This project follows a service-oriented architecture with TypeScript, proper error handling, and multiple data source fallbacks.
 
-You are developing a **CS2 Economy Helper** - an Overwolf-based application that provides real-time enemy economy tracking, bomb timer, and scoped crosshair assistance. This is a **performance-critical gaming application** that must maintain <2% CPU usage and <50MB memory footprint while providing accurate tactical information.
+**CRITICAL REFERENCE DOCUMENTS**: Always consult these files in priority order:
+1. `architecture.md` - Primary architectural blueprint and implementation patterns
+2. `CS2_Helper_boilerplate.md` - Service structure and modular design patterns
+3. `overwolf-patterns-guide.md` - Universal development standards and TypeScript patterns
+4. `sample_app.md` - Real-world implementation examples and GEP integration patterns
 
-For implementation always reference the Github Repository https://github.com/overwolf/events-sample-app
+## Core Architecture Adherence
 
-**Key Requirements:**
-- Overwolf platform integration (NOT standalone Electron.js)
-- Real-time game data processing via Overwolf Game Events API
-- VAC-compliant implementation (no memory manipulation/DLL injection)
-- Precise enemy economy calculations with team synchronization
-- Sub-100ms UI responsiveness during gameplay
+### 1. Follow the Established Architecture Pattern (architecture.md)
+**CRITICAL**: Always reference `architecture.md` as your single source of truth for:
+- High-level application structure with background/in-game/desktop windows
+- Manifest configuration requirements (see Section 2: Manifest Skeleton)
+- Background controller orchestration patterns (see Section 3: Background Controller)
+- Game event adapter implementation (see Section 4: Game Event Adapter)
+- Window management best practices (see Section 6: Modular Window Management)
 
-## Architecture Overview Reference
-1. **Strict Adherence to `Architecture.md`**
+```typescript
+// From architecture.md - Background Controller Pattern
+const CS2_ID = 10798;
+const REQUIRED_FEATURES = [
+  "match_info", "live_data", "kill", "death", "assist", "round_start", "round_end"
+];
 
-   * All code **must follow the architecture guidelines**.
-   * Before implementing new features, **review `Architecture.md`** to ensure design integrity.
-   * Changes impacting architecture must be documented in a `Proposals/` folder for review.
-    Key architectural principles:
-
-### Core Components
-- **Background Service**: Persistent game event processing and data management
-- **Economy Engine**: Mathematical model for enemy money estimation using kill feed, round outcomes, and statistical analysis  
-- **Overlay System**: High-performance transparent UI with adaptive opacity
-- **Synchronization Layer**: Team coordination via REST API with conflict resolution
-
-2. **Overwolf SDK Usage**
-
-   * Interact with the **Overwolf GEP (Game Events Provider)** for CS2 kill feed & telemetry.
-   * Implement hotkey bindings, toggles, and UI overlays using Overwolf’s API.
-   * Ensure **low CPU/GPU footprint** to avoid FPS drops.
-   * Features must **work in standalone mode** without a central server (fallback mode).
-
-3. **Performance Standards**
-
-   * Minimize DOM reflows & repaints.
-   * Avoid blocking the **main thread**.
-   * Use **requestAnimationFrame** for UI updates where applicable.
-   * Batch DOM updates, debounce expensive operations.
-
-### Data Flow
+function registerFeatures() {
+  overwolf.games.events.setRequiredFeatures(REQUIRED_FEATURES, res => {
+    if (!res.success) {
+      console.warn("GEP registration failed", res.error);
+    }
+  });
+}
 ```
-CS2 Game Events → Overwolf API → Economy Engine → UI Overlay
-                                      ↓
-                              Server Sync ← → Team Members
+
+### 2. Service-Oriented Design Implementation (CS2_Helper_boilerplate.md)
+Based on `CS2_Helper_boilerplate.md` Section 3 (Service Layer), implement these core services:
+
+```typescript
+// Required service structure from CS2_Helper_boilerplate.md
+interface CoreServices {
+  windowsService: WindowManagementService;     // Section 3.1 - Centralized window control
+  gameEventsService: GameEventsService;       // Section 3.2 - Primary GEP data source
+  gsiService: GSIService;                     // Section 3.3 - Valve GSI fallback
+  consoleLogService: ConsoleLogService;       // Section 3.4 - Log parsing fallback
+  economyCalculatorService: EconomyCalculatorService; // Section 3.5 - Business logic
+  fallbackManager: FallbackManager;           // Section 4 - Data source orchestration
+}
 ```
+
+### 3. TypeScript Standards (overwolf-patterns-guide.md)
+**MANDATORY**: Follow patterns from `overwolf-patterns-guide.md`:
+- Use `@overwolf/types` package for strict typing (Section 2: TypeScript Standardization)
+- Implement type-safe API wrappers around Overwolf SDK (Section 1: Service-Oriented Architecture)
+- Enable strict TypeScript configurations (Best Practices Section 1)
+- Create proper type definitions for all services and data structures
+
+```typescript
+// From overwolf-patterns-guide.md - Universal window management pattern
+export class WindowsService {
+  static obtainWindow = (name: string): Promise<WindowResult> => {
+    return new Promise((resolve, reject) => {
+      overwolf.windows.obtainDeclaredWindow(name, (result) => {
+        result.success ? resolve(result) : reject(new Error(result.error));
+      });
+    });
+  };
+}
+```
+
+### 4. Real-World Implementation Examples (sample_app.md)
+Reference `sample_app.md` for:
+- Repository structure patterns (Top-Level Files and Folders section)
+- GEP integration specifics (Section 1: Setting Up GEP)
+- Available CS2 events and data (Sections 2-3: Info Updates and Events)
+- Event handling best practices (Section 6: Best Practices)
 
 ## Development Standards & Quality Requirements
 
-### Code Quality Standards
-- **ES2022+ JavaScript** with modern async/await patterns
-- **Error boundaries** with graceful degradation 
-- **Memory leak prevention** - explicit cleanup in destructors
-- **Performance profiling** - sub-10ms processing targets
-- **Unit tests** for critical economy calculations
+### Code Quality Standards (overwolf-patterns-guide.md Framework Integration)
+1. **Zero Tolerance Policy**: No bugs, memory leaks, or performance issues
+2. **TypeScript First**: All code must be strictly typed (overwolf-patterns-guide.md Section 2)
+3. **Service Isolation**: Each service handles a single responsibility (overwolf-patterns-guide.md Section 1)
+4. **Error Handling**: Comprehensive try-catch blocks and graceful degradation
+5. **Performance**: <3ms overlay render time per frame (architecture.md Section 8)
+6. **Memory Management**: Proper cleanup of listeners and intervals (overwolf-patterns-guide.md Section 3)
 
-### Core Modules to Implement
+### Architecture Compliance Checklist (All Reference Documents)
+Before implementing any component, verify:
+- [ ] Does this follow the background → service → UI data flow? (architecture.md Section 1)
+- [ ] Are window management calls centralized through WindowsService? (CS2_Helper_boilerplate.md Section 3.1)
+- [ ] Is error handling implemented with proper fallbacks? (CS2_Helper_boilerplate.md Section 4)
+- [ ] Are TypeScript types defined and used correctly? (overwolf-patterns-guide.md Section 2)
+- [ ] Is the component properly cleaned up on destruction? (overwolf-patterns-guide.md Section 3)
+- [ ] Are GEP features registered according to sample patterns? (sample_app.md Section 1)
 
-src/
-├── main/                     # Electron main process
-├── renderer/                 # UI and overlay components  
-├── economy/                  # Economy calculation engine
-├── data/                     # CS2 economy data and rules
-├── sync/                     # Team synchronization
-├── utils/                    # Shared utilities
-└── types/                    # TypeScript definitions
+## Task Breakdown & Implementation Approach
 
-5. **Code Quality Requirements**
-
-   * **TypeScript** for type safety.
-   * **ESLint + Prettier** for linting & formatting.
-   * Modular code organization:
-
-     * `main/` → Overwolf main process logic
-     * `renderer/` → UI & renderer logic
-     * `services/` → data, game event handlers
-     * `shared/` → constants, utility functions
-   * All functions **must** have:
-
-     * Clear JSDoc or TSDoc comments
-     * Proper parameter validation
-   * Zero **magic numbers** — use named constants.
-
-### Performance Optimization
-// Example: Efficient event processing
-class EventProcessor {
-    constructor() {
-        this.eventQueue = new Map();
-        this.processingThrottle = 16; // 60fps limit
-    }
-    
-    processEvent(event) {
-        // Batch processing to avoid frame drops
-        requestAnimationFrame(() => this.batchProcess());
-    }
-}
-
-   * Minimize DOM reflows & repaints.
-   * Avoid blocking the **main thread**.
-   * Use **requestAnimationFrame** for UI updates where applicable.
-   * Batch DOM updates, debounce expensive operations.
-
-### Performance Requirements
-- **Memory Usage**: < 200MB total application footprint
-- **CPU Usage**: < 5% during active gameplay
-- **Startup Time**: < 3 seconds from launch to ready state
-- **Response Time**: < 100ms for UI interactions
-// Use efficient data structures
-const playerMoney = new Map<string, number>(); // Not object literals
-const economyHistory = new Array<EconomySnapshot>(30); // Fixed size arrays
-
-// Implement object pooling for frequent allocations
-class EconomyCalculator {
-  private calculationPool = new Array<CalculationContext>(10);
-  
-  getCalculationContext(): CalculationContext {
-    return this.calculationPool.pop() || new CalculationContext();
-  }
-}
-
-### Memory Management
-- **Explicit cleanup** in window close handlers
-- **WeakMap/WeakSet** for temporary references  
-- **Object pooling** for frequent allocations
-- **Event listener cleanup** to prevent leaks
+### Phase 1: Foundation Setup (architecture.md + sample_app.md)
 ```typescript
-// Proper cleanup patterns required
-class EconomyTracker {
-  private listeners: Set<Function> = new Set();
-  
-  dispose(): void {
-    this.listeners.clear();
-    // Clean up all references
-  }
-}
-
-// Use weak references where appropriate
-const cache = new WeakMap<Player, EconomyState>();
+// 1. Create manifest.json following architecture.md Section 2 specifications
+// 2. Implement WindowsService following overwolf-patterns-guide.md universal pattern
+// 3. Setup background controller per architecture.md Section 3
+// 4. Establish TypeScript build pipeline with sample_app.md dependency patterns
 ```
 
-## Overwolf-Specific Implementation Guidelines
+### Phase 2: Data Services Implementation (CS2_Helper_boilerplate.md + sample_app.md)
+```typescript
+// 1. GameEventsService - Primary GEP integration per sample_app.md Section 1
+// 2. GSIService - HTTP polling fallback (CS2_Helper_boilerplate.md Section 3.3)
+// 3. ConsoleLogService - File/media reading fallback (CS2_Helper_boilerplate.md Section 3.4)
+// 4. FallbackManager - Intelligent source switching (CS2_Helper_boilerplate.md Section 4)
+```
 
-### Critical Overwolf Patterns
-javascript
-// Correct window communication
-overwolf.windows.sendMessage(windowId, message, (result) => {
-    if (!result.success) {
-        this.handleCommunicationError(result);
-    }
-});
+### Phase 3: Business Logic (CS2_Helper_boilerplate.md)
+```typescript
+// 1. EconomyCalculatorService - Core calculation engine (Section 3.5)
+// 2. Data aggregation and validation across sources
+// 3. Real-time update mechanisms with batching
+```
 
-// Proper game events handling  
-overwolf.games.events.setRequiredFeatures(['live_data', 'match_info'], (result) => {
-    if (result.success) {
-        this.initializeGameEventListeners();
-    }
-});
+### Phase 4: UI Implementation (architecture.md)
+```typescript
+// 1. In-game overlay per architecture.md Section 5
+// 2. Desktop window for detailed analytics
+// 3. Hotkey handling and window state management (architecture.md Section 2)
+```
 
-### State Management
+## Performance & Optimization Requirements
 
-// Immutable state patterns
-interface AppState {
-  readonly players: ReadonlyArray<Player>;
-  readonly currentRound: number;
-  readonly economyState: Readonly<EconomyState>;
+### Rendering Optimization (architecture.md Section 5)
+- **Batch Updates**: Group DOM updates, render max every 100ms (architecture.md UX tip)
+- **Efficient Selectors**: Cache DOM elements, avoid repeated queries
+- **Memory Cleanup**: Remove all event listeners on component destruction (overwolf-patterns-guide.md Section 3)
+- **Lightweight Overlay**: Keep in-game window minimal and focused (architecture.md Section 1)
+
+### Data Processing Optimization (sample_app.md + CS2_Helper_boilerplate.md)
+- **Debounce Events**: Prevent excessive processing of rapid game events
+- **Smart Caching**: Cache calculated values, only recompute when necessary
+- **Background Processing**: Keep heavy calculations in background window (architecture.md Section 1)
+- **Fallback Logic**: Implement intelligent switching per CS2_Helper_boilerplate.md Section 4
+
+## Error Handling & Resilience
+
+### Comprehensive Error Strategy (overwolf-patterns-guide.md)
+```typescript
+// Template for all async operations - following overwolf-patterns-guide.md patterns
+try {
+  const result = await riskOperation();
+  return processResult(result);
+} catch (error) {
+  console.error(`Operation failed: ${error.message}`);
+  // Implement fallback strategy per CS2_Helper_boilerplate.md Section 4
+  return await fallbackOperation();
 }
+```
 
-// Use reducers for state transitions
-function economyReducer(state: EconomyState, action: EconomyAction): EconomyState {
-  switch (action.type) {
-    case 'ROUND_END':
-      return calculateNewEconomyState(state, action.payload);
-    default:
-      return state;
-  }
+### Specific Error Scenarios (CS2_Helper_boilerplate.md + sample_app.md)
+1. **GEP Unavailability**: Automatic fallback to GSI → Console Logs (CS2_Helper_boilerplate.md Section 4)
+2. **Window Management Failures**: Retry with exponential backoff (architecture.md Section 6)
+3. **Data Parsing Errors**: Validate and sanitize all inputs (sample_app.md Section 6)
+4. **Network Issues**: Implement timeout and retry mechanisms
+5. **Feature Support**: Handle missing GEP features gracefully (sample_app.md Section 4)
+
+## State-of-the-Art Practices (overwolf-patterns-guide.md)
+
+### Modern Development Approaches (overwolf-patterns-guide.md Development Standards)
+1. **Reactive State Management**: Use observables/event emitters for data flow
+2. **Functional Programming**: Prefer pure functions and immutable operations
+3. **Async/Await**: Modern async patterns instead of callbacks
+4. **Module Boundaries**: Clear imports/exports with proper dependency injection
+5. **Testing Strategy**: Unit tests for all services and critical functions
+
+### Performance Monitoring (architecture.md Section 8)
+```typescript
+// Implement performance tracking per architecture.md testing requirements
+class PerformanceMonitor {
+  static trackRenderTime(componentName: string, renderFn: () => void) {
+    const start = performance.now();
+    renderFn();
+    const duration = performance.now() - start;
+    if (duration > 3) { // architecture.md <3ms requirement
+      console.warn(`${componentName} render took ${duration}ms`);
+    }
+  }
 }
+```
 
-### Async Operations
+## Implementation Guidelines
 
-// Proper async/await usage with timeouts
-async function fetchGameState(timeout = 5000): Promise<GameState> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-  
-  try {
-    const response = await fetch('/api/gamestate', { 
-      signal: controller.signal 
-    });
-    return await response.json();
-  } finally {
-    clearTimeout(timeoutId);
-  }
+### When Writing Code (All Reference Documents)
+1. **Start with Types**: Define interfaces before implementation (overwolf-patterns-guide.md Section 2)
+2. **Service First**: Implement service layer before UI components (CS2_Helper_boilerplate.md approach)
+3. **Test Boundaries**: Test each service in isolation (overwolf-patterns-guide.md Section 4)
+4. **Progressive Enhancement**: Build core features first, add enhancements
+5. **Documentation**: Comment complex algorithms and business logic
+6. **GEP Integration**: Follow sample_app.md patterns for event handling
+
+### Code Review Checklist (All Reference Documents)
+Before submitting any code, verify:
+- [ ] All TypeScript errors resolved (overwolf-patterns-guide.md standards)
+- [ ] No console.log statements in production code
+- [ ] Proper error handling implemented (CS2_Helper_boilerplate.md Section 4)
+- [ ] Memory cleanup verified (no leaked listeners) (overwolf-patterns-guide.md Section 3)
+- [ ] Performance requirements met (architecture.md <3ms rule)
+- [ ] Architecture patterns followed (architecture.md compliance)
+- [ ] Fallback strategies implemented (CS2_Helper_boilerplate.md Section 4)
+- [ ] GEP features properly registered (sample_app.md Section 1)
+
+## Integration Points
+
+### Overwolf SDK Integration (overwolf-patterns-guide.md + sample_app.md)
+```typescript
+// Always wrap Overwolf APIs with proper error handling
+// Following overwolf-patterns-guide.md universal patterns
+class OverwolfAPIWrapper {
+  static async safeCall<T>(
+    apiCall: (callback: (result: any) => void) => void
+  ): Promise<T> {
+    return new Promise((resolve, reject) => {
+      try {
+        apiCall((result) => {
+          if (result.success) {
+            resolve(result);
+          } else {
+            reject(new Error(result.error));
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
+```
 
-### Performance Requirements
-- **Overlay rendering**: 60fps minimum, use `requestAnimationFrame`
-- **Event processing**: <10ms per game event
-- **Memory usage**: Monitor with `performance.memory`
-- **Network requests**: Batch synchronization calls
+### CS2-Specific Game Events (sample_app.md)
+Reference sample_app.md for:
+- **Available Events** (Section 3): kill, death, assist, round_start, round_end, match_start, match_end
+- **Info Updates** (Section 2): live_data, match_info, gep_internal
+- **Event Status Monitoring** (Section 4): Handle feature unavailability gracefully
+- **Best Practices** (Section 6): Register features early, modular consumers, type safety
 
-## Task Breakdown & Implementation Order
+### External Dependencies (sample_app.md + overwolf-patterns-guide.md)
+- **Build Tools**: Use Vite/Webpack for optimal bundle generation (sample_app.md tooling)
+- **Testing**: Jest for unit tests, Overwolf dev tools for integration testing
+- **TypeScript**: Follow sample_app.md dependency patterns with strict configs
 
-### Phase 1: Foundation (Priority: CRITICAL)
-1. **Manifest Configuration**
-   - Game targeting (CS2 ID: 21640)
-   - Required permissions and features
-   - Window declarations with proper sizing
+## Quality Assurance
 
-2. **Background Service Core**
-   - Overwolf API initialization with error handling
-   - Game event listener setup with feature validation
-   - Window lifecycle management
+### Testing Requirements (overwolf-patterns-guide.md + architecture.md)
+1. **Unit Tests**: All service methods must have corresponding tests
+2. **Integration Tests**: Test service interactions and data flow
+3. **Performance Tests**: Verify render times and memory usage (architecture.md Section 8)
+4. **Manual Testing**: Full CS2 gameplay session validation (architecture.md Section 8)
+5. **GEP Testing**: Validate event reception and feature availability (sample_app.md Section 6)
 
-3. **Economy Engine Foundation**
-   - Kill reward constants (weapon-specific)
-   - Round outcome processing logic
-   - Player money estimation algorithms
+### Code Standards Enforcement (overwolf-patterns-guide.md)
+- ESLint with strict rules for TypeScript (Development Standards Section)
+- Prettier for consistent formatting
+- Pre-commit hooks for quality gates
+- Automated bundle analysis for size optimization (Best Practices Section)
 
-### Phase 2: Core Features (Priority: HIGH)
-4. **Game Event Processing**
-   - Kill feed parsing with weapon identification
-   - Round state tracking (live/freezetime/over)
-   - Player roster data integration
+## Final Deliverables
 
-5. **Overlay System**
-   - Transparent window with clickthrough
-   - Adaptive opacity based on game phase
-   - Performance-optimized rendering
+### Production Checklist (All Reference Documents)
+- [ ] All services implemented with proper fallbacks (CS2_Helper_boilerplate.md)
+- [ ] TypeScript compilation without errors or warnings (overwolf-patterns-guide.md)
+- [ ] Performance benchmarks met (<3ms render time) (architecture.md)
+- [ ] Memory leaks eliminated (verified with DevTools) (overwolf-patterns-guide.md)
+- [ ] Error handling covers all edge cases (CS2_Helper_boilerplate.md Section 4)
+- [ ] Full CS2 match testing completed (architecture.md Section 8)
+- [ ] OPK bundle generated and validated (architecture.md Section 9)
+- [ ] GEP features properly registered and tested (sample_app.md Section 6)
 
-6. **Economy Calculations**
-   - Enemy team money estimation ranges
-   - Confidence scoring algorithms
-   - Buy scenario predictions
+### Documentation Requirements
+- Service API documentation with examples (referencing sample_app.md patterns)
+- Architecture decision rationale (based on architecture.md principles)
+- Performance optimization explanations (architecture.md Section 8)
+- Troubleshooting guide for common issues (CS2_Helper_boilerplate.md fallback scenarios)
+- GEP integration guide (sample_app.md implementation patterns)
 
-### Phase 3: Advanced Features (Priority: MEDIUM)
-7. **Team Synchronization**
-   - REST API client with retry logic
-   - Conflict resolution for estimate disagreements
-   - Offline mode fallback
+---
 
-8. **Enhanced UI Components**
-   - Bomb timer with precise countdown
-   - Scoped crosshair for sniper rifles
-   - Settings panel with hotkey configuration
+**Remember**: This project's success depends on strict adherence to the architectural patterns outlined in all reference documents. Always prioritize code quality, performance, and user experience. When in doubt:
+1. **Architecture Questions** → Refer to `architecture.md`
+2. **Service Implementation** → Follow `CS2_Helper_boilerplate.md`
+3. **TypeScript & Standards** → Check `overwolf-patterns-guide.md`
+4. **GEP Integration** → Use `sample_app.md` examples
 
-## Code Implementation Standards
-
-
-### Function Documentation Template
-javascript
-/**
- * Calculates enemy player money estimation based on game events
- * @param {Object} player - Player data from roster
- * @param {Array} killEvents - Recent kill feed events
- * @param {Object} roundData - Round outcome information
- * @returns {Object} Money estimation with min/max/likely values and confidence
- * @performance Target: <5ms execution time
- * @memory Allocates temporary objects - ensure cleanup
- */
-function calculatePlayerEconomy(player, killEvents, roundData) {
-    // Implementation with error handling and performance monitoring
-}
-
-
-### Error Handling Pattern
-javascript
-class EconomyEngine {
-    processGameEvent(event) {
-        try {
-            this.validateEventData(event);
-            const result = this.calculateEconomyUpdate(event);
-            this.notifyObservers(result);
-        } catch (error) {
-            this.logError('Economy processing failed', error);
-            this.fallbackToSafeState();
-        }
-    }
-}
-
-
-### Performance Monitoring
-javascript
-// Add performance tracking to critical functions
-function performanceWrapper(fn, name) {
-    return function(...args) {
-        const start = performance.now();
-        const result = fn.apply(this, args);
-        const duration = performance.now() - start;
-        
-        if (duration > 10) { // Log slow operations
-            console.warn(`Slow operation ${name}: ${duration}ms`);
-        }
-        
-        return result;
-    };
-}
-
-
-## Critical Implementation Notes
-
-### Overwolf
-**IMPORTANT**: This project uses **Overwolf**, NOT standalone Electron.js. Key differences:
-- Use `overwolf.windows` instead of `BrowserWindow`
-- Game events via `overwolf.games.events` API
-- No Node.js modules available
-- Limited to web APIs and Overwolf APIs
-
-### Game Events Reliability
-- Always validate event data existence before processing
-- Implement fallback mechanisms for missing data
-- Handle Overwolf API failures gracefully
-
-### Economy Calculation Accuracy
-- Use CS2-specific constants (kill rewards, round bonuses)
-- Account for consecutive loss bonuses (1400→3400)
-- Factor in equipment costs and survival bonuses
-- Implement confidence decay over time
-
-### UI Performance Optimization
-- Use CSS transforms instead of changing layout properties
-- Minimize DOM manipulations during game events
-- Implement virtual scrolling for large player lists
-- Cache computed styles and reuse elements
-
-## Testing & Validation
-
-### Unit Testing Priorities
-1. **Economy calculations** - All money estimation functions
-2. **Event processing** - Kill feed parsing accuracy  
-3. **Synchronization logic** - Conflict resolution algorithms
-4. **Performance benchmarks** - Memory and CPU usage validation
-
-### Integration Testing
-- Test with live CS2 matches
-- Validate accuracy against known economy states
-- Performance testing under high event load
-- Team synchronization with multiple clients
-
-### Quality Gates
-- **Memory leaks**: Must pass 30-minute stress test
-- **Performance**: <2% CPU usage during active gameplay
-- **Accuracy**: Economy estimates within ±$500 (80% confidence)
-- **Reliability**: <0.1% crash rate per gaming session
-
-## Development Workflow
-
-1. **Reference Architecture**: Always check architecture document for design decisions
-2. **Performance First**: Profile before and after each implementation
-3. **Incremental Testing**: Test each component with live CS2 data
-4. **Error Logging**: Comprehensive logging for debugging in production
-5. **Code Review**: Self-review against these standards before completion
-
-## State-of-the-Art Practices
-
-### Modern JavaScript Patterns
-- Use `AbortController` for cancellable async operations
-- Implement proper cleanup with `WeakRef` for observer patterns
-- Utilize `IntersectionObserver` for efficient UI updates
-- Apply `requestIdleCallback` for non-critical background tasks
-
-### Performance Optimization Techniques
-- **Object pooling** for frequently created game event objects
-- **Batch API calls** to reduce Overwolf communication overhead  
-- **Differential updates** - only sync changed economy data
-- **Lazy loading** - defer initialization of inactive features
-
-### Memory Management Best Practices
-- **Explicit nullification** of references in cleanup methods
-- **Event delegation** to reduce listener count
-- **Circular reference detection** in complex object graphs
-- **Regular garbage collection hints** during low-activity periods
-
-
-# Success Metrics
-
-Your implementation will be measured against:
-1. **Accuracy**: Economy predictions within 15% of actual values
-2. **Performance**: Consistent 60+ FPS overlay rendering
-3. **Reliability**: <1% crash rate during 1000+ round testing
-4. **User Experience**: <500ms response time for all interactions
-5. **Code Quality**: Maintainability score >8/10 via static analysis
-
-When you encounter design decisions or need clarification:
-1. Reference this document and the conversation context
-2. Propose solutions with trade-off analysis
-3. Provide code examples for complex implementations
-4. Ask specific, actionable questions
-
-## **Final Notes**
-
-* Always **think ahead for extendability** — the code should be easy to expand for future games/features.
-* Optimize **build size and startup time**.
-* Prioritize **user experience** — overlays should never disrupt gameplay.
-* **Security is critical** — sandbox renderer, validate all inputs, prevent injection.
-Remember: This is a **tactical advantage tool** for competitive CS2 players. Every millisecond of delay or inaccuracy impacts real gameplay outcomes. Code accordingly.
+Maintain the service-oriented, fallback-enabled approach throughout development while following the established patterns from all reference documentation.
