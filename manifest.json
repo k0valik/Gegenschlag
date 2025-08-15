@@ -1,0 +1,55 @@
+{
+  "manifest_version": 1,
+  "type": "WebApp",
+  "meta": {
+    "name": "CS2-Companion",
+    "author": "Your Studio",
+    "version": "0.1.0",
+    "minimum-overwolf-version": "0.199.0",
+    "dock_button_title": "CS2 Stats",
+    "icon": "assets/IconMouseOver.png",
+    "icon_gray": "assets/IconMouseNormal.png",
+    "launcher_icon": "assets/desktop-icon.ico"
+  },
+  "permissions": ["GameInfo", "Hotkeys", "FileSystem"],
+  "data": {
+    "game_targeting": {
+      "type": "dedicated",
+      "game_ids": [10798]
+    },
+    "game_events": [10798],
+    "start_window": "background",
+    "windows": {
+      "background": {
+        "file": "windows/background/index.html",
+        "is_background_page": true
+      },
+      "in_game": {
+        "file": "windows/in_game/index.html",
+        "transparent": true,
+        "clickthrough": false,
+        "in_game_only": true,
+        "size": { "width": 400, "height": 250 },
+        "topmost": true
+      },
+      "desktop": {
+        "file": "windows/desktop/index.html",
+        "desktop_only": true,
+        "native_window": true,
+        "size": { "width": 800, "height": 600 }
+      }
+    },
+    "hotkeys": {
+      "toggle_overlay": {
+        "title": "Toggle Overlay",
+        "action-type": "toggle",
+        "default": "Alt+O"
+      }
+    },
+    "launch_events": [{
+      "event": "GameLaunch",
+      "event_data": { "game_ids": [10798] },
+      "start_minimized": true
+    }]
+  }
+}
