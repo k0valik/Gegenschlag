@@ -4,6 +4,8 @@
 
 You are developing a **CS2 Economy Helper** - an Overwolf-based application that provides real-time enemy economy tracking, bomb timer, and scoped crosshair assistance. This is a **performance-critical gaming application** that must maintain <2% CPU usage and <50MB memory footprint while providing accurate tactical information.
 
+For implementation always reference the Github Repository https://github.com/overwolf/events-sample-app
+
 **Key Requirements:**
 - Overwolf platform integration (NOT standalone Electron.js)
 - Real-time game data processing via Overwolf Game Events API
