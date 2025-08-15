@@ -1,0 +1,19 @@
+{
+  "name": "cs2-companion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A CS2 companion app for Overwolf",
+  "scripts": {
+    "build": "echo \"Error: no build specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Your Studio",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mitt": "^3.0.0"
+  },
+  "devDependencies": {
+    "@overwolf/types": "^3.29.1",
+    "typescript": "^5.0.0"
+  }
+}
