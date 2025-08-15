@@ -1,0 +1,99 @@
+{
+  "manifest_version": 1,
+  "type": "WebApp",
+  "meta": {
+    "name": "CS2 Economy Helper",
+    "author": "CS2 Strategic Team",
+    "version": "1.0.0",
+    "minimum-overwolf-version": "0.77.10",
+    "minimum-gep-version": "237.0",
+    "description": "Real-time enemy economy tracking and strategic overlay for CS2",
+    "dock_button_title": "CS2 Economy",
+    "icon": "icons/icon.png",
+    "icon_gray": "icons/icon_gray.png",
+    "launcher_icon": "icons/launcher_icon.ico",
+    "window_icon": "icons/window_icon.png"
+  },
+  "permissions": ["Hotkeys", "GameInfo"],
+  "data": {
+    "start_window": "background",
+    "windows": {
+      "background": {
+        "file": "windows/background/background.html",
+        "is_background_page": true,
+        "allow_local_file_access": true
+      },
+      "desktop": {
+        "file": "windows/desktop/desktop.html",
+        "desktop_only": true,
+        "transparent": false,
+        "resizable": true,
+        "size": {
+          "width": 400,
+          "height": 300
+        },
+        "min_size": {
+          "width": 350,
+          "height": 250
+        }
+      },
+      "overlay": {
+        "file": "windows/overlay/overlay.html",
+        "in_game_only": true,
+        "transparent": true,
+        "override_on_update": true,
+        "clickthrough": false,
+        "size": {
+          "width": 1920,
+          "height": 1080
+        },
+        "start_position": {
+          "top": 0,
+          "left": 0
+        },
+        "hotkeys": {
+          "toggle_economy": {
+            "title": "Toggle Economy Panel",
+            "action-type": "toggle",
+            "default": "Ctrl+E"
+          },
+          "toggle_bomb_timer": {
+            "title": "Toggle Bomb Timer",
+            "action-type": "toggle",
+            "default": "Ctrl+B"
+          }
+        }
+      }
+    },
+    "game_targeting": {
+      "type": "dedicated",
+      "game_ids": [21640]
+    },
+    "game_events": [
+      {
+        "event_id": "live_data",
+        "event_data": [
+          "provider", "player", "steam_id", "game_phase", "round_phase", 
+          "score", "mode_name", "map_name", "kills", "deaths", "assists", 
+          "round_number"
+        ]
+      },
+      {
+        "event_id": "match_info",
+        "event_data": [
+          "roster", "game_mode", "match_outcome", "elo_points", 
+          "pseudo_match_id", "is_ranked", "mm_state"
+        ]
+      }
+    ],
+    "launch_events": [
+      {
+        "event": "GameLaunch",
+        "event_data": {
+          "game_ids": [21640]
+        },
+        "start_minimized": true
+      }
+    ]
+  }
+}

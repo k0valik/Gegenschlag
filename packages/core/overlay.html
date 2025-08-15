@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>CS2 Economy Helper - Overlay</title>
+    <style>
+        :root {
+            --bg-color: rgba(0, 0, 0, 0.5);
+            --ct-color: #4A90E2;
+            --t-color: #F5A623;
+            --text-color: #ffffff;
+            --high-conf: #7ED321;
+            --med-conf: #F5A623;
+            --low-conf: #D0021B;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: transparent;
+            pointer-events: none; /* clickthrough */
+            user-select: none;
+        }
+        #economy-panel {
+            position: absolute;
+            top: 10%;
+            right: 2%;
+            width: 320px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            padding: 8px;
+            font-family: Arial, sans-serif;
+            color: var(--text-color);
+            font-size: 12px;
+            display: none;
+        }
+        .team-header {
+            font-weight: bold;
+            margin: 4px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 2px 4px;
+            text-align: left;
+        }
+        tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .confidence-high { color: var(--high-conf); }
+        .confidence-medium { color: var(--med-conf); }
+        .confidence-low { color: var(--low-conf); }
+    </style>
+</head>
+<body>
+    <div id="economy-panel"></div>
+    <script src="../../packages/core/constants.js"></script>
+    <script src="overlay.js"></script>
+</body>
+</html>
