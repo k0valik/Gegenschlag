@@ -286,3 +286,26 @@ Use *Vite* or *Webpack* to output each window bundle into `windows/<name>`; keep
 | Exclusive Mode handling | Windows → Exclusive Mode guide [10] |
 
 > **Tip:** Keep Overwolf SDK typings (`npm i -D @overwolf/types`) to enjoy IntelliSense across all the APIs.
+
+---
+
+## 10. Economy Engine Architecture
+
+The core logic of the application resides in the **Economy Engine**, which is a collection of services designed to track, calculate, and predict the economic state of the CS2 match.
+
+### Data Flow
+
+The engine is multimodal, relying on several data sources for accuracy and resilience.
+
+1.  **Primary Source (GEP):** The `GameEventsService` is the primary data source. It listens for real-time events from Overwolf's Game Events Provider (GEP), such as `kill`, `round_end`, and `bomb_planted`. These events provide immediate, low-latency information.
+
+2.  **Secondary Source (GSI):** The `GSIService` acts as a secondary, confirming source. It polls a local endpoint for data from Valve's Game State Integration. Its primary role is to provide a reliable confirmation of round state changes (e.g., when a round phase transitions to `over`), which helps prevent premature calculations based on GEP events alone.
+
+3.  **Coordination:** The `GameEventsService` and `GSIService` work in tandem. When a `round_end` event is received from GEP, the system waits for a confirmation from GSI before triggering the final end-of-round calculations.
+
+### Calculation Logic
+
+-   **`economyCalculatorService.ts`**: This is the brain of the engine. It maintains the economic state of each player and team (`PlayerState`, `TeamState`). It receives data from the other services and applies the game's economic rules to update the state.
+-   **`constants/economy.ts`**: This file stores all the static data for the economy, such as kill rewards and round loss bonuses, keeping the core logic clean and easy to maintain.
+
+This layered approach ensures that the economy tracking is both fast (reacting to GEP) and accurate (confirmed by GSI).
