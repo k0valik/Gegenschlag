@@ -1,6 +1,21 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
-  <div id="hud" class="panel"></div>
-  <script type="module" src="hud.ts"></script>
+    <div id="economy-tracker" class="container">
+        <div class="team-buy-prediction">
+            <span id="team-buy-confidence"></span>
+        </div>
+        <ul id="player-list" class="player-list">
+            <li>Player 1: <span id="player-1-eco"></span></li>
+            <li>Player 2: <span id="player-2-eco"></span></li>
+            <li>Player 3: <span id="player-3-eco"></span></li>
+            <li>Player 4: <span id="player-4-eco"></span></li>
+            <li>Player 5: <span id="player-5-eco"></span></li>
+        </ul>
+    </div>
+    <script type="module" src="hud.ts"></script>
 </body>
 </html>
