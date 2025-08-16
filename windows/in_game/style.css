@@ -1,37 +1,133 @@
+:root {
+    --font-main: Arial, sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+
+    --color-bg: #0B0E12;
+    --color-text-hi: #F5F7FA;
+    --color-text-lo: #A8B0BD;
+
+    --color-eco-eco: #6CA0DC;
+    --color-eco-force: #F0B429;
+    --color-eco-full: #4CAF50;
+
+    --color-risk-ok: #37C7A8;
+    --color-risk-warn: #F5A524;
+    --color-risk-crit: #FF4D4F;
+}
+
 body {
     background-color: transparent;
-    font-family: Arial, sans-serif;
-    color: white;
+    font-family: var(--font-main);
+    color: var(--color-text-hi);
     text-shadow: 1px 1px 2px black;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
 
 .container {
     position: absolute;
     top: 20px;
-    right: 20px;
-    width: 350px;
-    background-color: rgba(0, 0, 0, 0.6);
+    left: 20px;
+    width: 380px;
+    background-color: rgba(11, 14, 18, 0.85);
     border-radius: 10px;
     padding: 15px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.team-buy-prediction {
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
+.top-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.player-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+.economy-chip {
+    font-size: 0.9em;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.player-list li {
-    padding: 5px 0;
-    font-size: 1em;
+.risk-meter {
+    font-size: 0.9em;
+    text-align: center;
 }
+
+#risk-bar {
+    width: 80px;
+    height: 10px;
+    background-color: var(--color-risk-ok);
+    border-radius: 5px;
+    margin-top: 4px;
+}
+
+.player-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #333;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.money {
+    font-family: var(--font-mono);
+    font-size: 1.1em;
+}
+
+.buy-pill {
+    font-size: 0.8em;
+    padding: 3px 8px;
+    border-radius: 10px;
+    color: white;
+}
+
+.buy-pill.eco { background-color: var(--color-eco-eco); }
+.buy-pill.force { background-color: var(--color-eco-force); }
+.buy-pill.full { background-color: var(--color-eco-full); }
+
+.toasts-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Add styles for EventToasts later */

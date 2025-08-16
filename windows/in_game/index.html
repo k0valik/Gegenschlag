@@ -4,17 +4,83 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="economy-tracker" class="container">
-        <div class="team-buy-prediction">
-            <span id="team-buy-confidence"></span>
+    <div id="compact-hud" class="container">
+        <!-- Economy Chip and Risk Meter -->
+        <div class="top-section">
+            <div id="economy-chip" class="economy-chip">
+                <span>Loss Bonus: <span id="loss-bonus"></span></span>
+                <span>Team AVG: <span id="team-avg-money"></span></span>
+                <span>Prediction: <span id="buy-prediction"></span></span>
+            </div>
+            <div id="risk-meter" class="risk-meter">
+                <span>Risk</span>
+                <div id="risk-bar"></div>
+            </div>
         </div>
-        <ul id="player-list" class="player-list">
-            <li>Player 1: <span id="player-1-eco"></span></li>
-            <li>Player 2: <span id="player-2-eco"></span></li>
-            <li>Player 3: <span id="player-3-eco"></span></li>
-            <li>Player 4: <span id="player-4-eco"></span></li>
-            <li>Player 5: <span id="player-5-eco"></span></li>
-        </ul>
+
+        <!-- Player Cards -->
+        <div id="player-cards" class="player-cards-container">
+            <!-- Player 1 -->
+            <div class="player-card">
+                <div class="player-info">
+                    <img id="p1-avatar" src="" class="avatar">
+                    <span id="p1-name" class="player-name"></span>
+                </div>
+                <div class="player-stats">
+                    <span id="p1-money" class="money"></span>
+                    <span id="p1-buy-likelihood" class="buy-pill"></span>
+                </div>
+            </div>
+            <!-- Player 2 -->
+            <div class="player-card">
+                <div class="player-info">
+                    <img id="p2-avatar" src="" class="avatar">
+                    <span id="p2-name" class="player-name"></span>
+                </div>
+                <div class="player-stats">
+                    <span id="p2-money" class="money"></span>
+                    <span id="p2-buy-likelihood" class="buy-pill"></span>
+                </div>
+            </div>
+            <!-- Player 3 -->
+            <div class="player-card">
+                <div class="player-info">
+                    <img id="p3-avatar" src="" class="avatar">
+                    <span id="p3-name" class="player-name"></span>
+                </div>
+                <div class="player-stats">
+                    <span id="p3-money" class="money"></span>
+                    <span id="p3-buy-likelihood" class="buy-pill"></span>
+                </div>
+            </div>
+            <!-- Player 4 -->
+            <div class="player-card">
+                <div class="player-info">
+                    <img id="p4-avatar" src="" class="avatar">
+                    <span id="p4-name" class="player-name"></span>
+                </div>
+                <div class="player-stats">
+                    <span id="p4-money" class="money"></span>
+                    <span id="p4-buy-likelihood" class="buy-pill"></span>
+                </div>
+            </div>
+            <!-- Player 5 -->
+            <div class="player-card">
+                <div class="player-info">
+                    <img id="p5-avatar" src="" class="avatar">
+                    <span id="p5-name" class="player-name"></span>
+                </div>
+                <div class="player-stats">
+                    <span id="p5-money" class="money"></span>
+                    <span id="p5-buy-likelihood" class="buy-pill"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Toasts Container -->
+        <div id="event-toasts" class="toasts-container">
+            <!-- Toasts will be dynamically inserted here -->
+        </div>
     </div>
     <script type="module" src="hud.ts"></script>
 </body>
