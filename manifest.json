@@ -27,7 +27,7 @@
       "in_game": {
         "file": "windows/in_game/index.html",
         "transparent": true,
-        "clickthrough": false,
+        "clickthrough": true,
         "in_game_only": true,
         "size": { "width": 400, "height": 250 },
         "topmost": true
